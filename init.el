@@ -1,8 +1,7 @@
 
-; add .emacs.d/init.d to load-path
-(setq load-path 
-      (cons (expand-file-name "~/.emacs.d/init.d/")
-	    load-path))
+; add .emacs.d/init.d, .emacs.d/my-lisp to load-path
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/init.d/"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/my-lisp/"))
 
 ; initialize elpa
 (require 'init-elpa)
@@ -14,9 +13,29 @@
 
 (add-hook 'after-init-hook
 	  (lambda ()
-	    (require 'init-helm)
-	    (require 'init-google-c-style)
+            ;; directly require my library
+            (require 'pretty-jump-of-line)
+            (require 'switch-to-user-buffer)
+
+	    ;; directly require elpa library
+	    (require 'yasnippet)
+
+	    ;; custom require
+            (require 'init-keybind)
+	    (require 'init-misc)
+	    (require 'init-system-dependent)
+
 	    (require 'init-auto-complete-config)
+	    (require 'init-google-c-style)
+	    (require 'init-helm)
+            (require 'init-auto-insert)
+            (require 'init-flymake)
+
+            (require 'init-go-mode)
+            (require 'init-html-mode)
+            (require 'init-js-mode)
+            (require 'init-python-mode)
+            (require 'init-ruby-mode)
 	    ))
 
 (progn (cd "~"))

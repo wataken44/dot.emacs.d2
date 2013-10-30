@@ -3,6 +3,9 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/init.d/"))
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/my-lisp/"))
 
+(require 'init-misc)
+(require 'init-system-dependent)
+
 ; initialize elpa
 (require 'init-elpa)
 
@@ -22,8 +25,6 @@
 
 	    ;; custom require
             (require 'init-keybind)
-	    (require 'init-misc)
-	    (require 'init-system-dependent)
 
 	    (require 'init-auto-complete-config)
 	    (require 'init-google-c-style)

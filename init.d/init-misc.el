@@ -1,4 +1,15 @@
 
+; use tango-dark color-theme
+(if (functionp 'load-theme)
+    (load-theme 'tango-dark))
+
+;; disable tool/menu bar
+(if (functionp 'tool-bar-mode)
+    (tool-bar-mode 0))
+(if (functionp 'menu-bar-mode)
+    (menu-bar-mode 0))
+
+;; enable font lock mode
 (global-font-lock-mode t)
 
 ;; use japanese, UTF-8
@@ -21,19 +32,9 @@
 ; do not use tab by default
 (setq-default indent-tabs-mode nil)
 
-; use tango-dark color-theme
-(if (functionp 'load-theme)
-    (load-theme 'tango-dark))
-
 ;; emphasize paren
 (if (functionp 'show-paren-mode)
     (show-paren-mode 1))
-
-;; disable tool/menu bar
-(if (functionp 'tool-bar-mode)
-    (tool-bar-mode 0))
-(if (functionp 'menu-bar-mode)
-    (menu-bar-mode 0))
 
 ;; disable cursor blink
 (if (functionp 'blink-cursor-mode)

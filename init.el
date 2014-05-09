@@ -37,6 +37,7 @@
             (require 'init-js-mode)
             (require 'init-python-mode)
             (require 'init-ruby-mode)
+            (require 'init-uniquify)
 	    ))
 
 (progn (cd "~"))

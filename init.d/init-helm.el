@@ -1,4 +1,3 @@
-
 (require 'helm-config)
 
 ;; enable helm-mode

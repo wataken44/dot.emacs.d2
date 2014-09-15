@@ -46,6 +46,9 @@
 (if (functionp 'line-number-mode)
     (line-number-mode t))
 
+;; disable vc-git
+(setq vc-handled-backends ())
+
 ;; start emacs server
 (server-start)
 

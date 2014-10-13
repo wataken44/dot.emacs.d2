@@ -50,6 +50,8 @@
 (setq vc-handled-backends ())
 
 ;; start emacs server
-(server-start)
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 (provide 'init-misc)

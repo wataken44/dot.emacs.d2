@@ -3,21 +3,19 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/init.d/"))
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/my-lisp/"))
 
-; add .emacs.d/site-lisp subdirectories to load-path
-(progn (cd "~/.emacs.d/site-lisp/")
-       (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-           (normal-top-level-add-subdirs-to-load-path)))
+; add .emacs.d/site-lisp/ and .emacs.d/elpa/ subdirectories to load-path
+(dolist (dir '("~/.emacs.d/site-lisp/" "~/.emacs.d/elpa/"))
+  (let ((default-directory dir))
+    (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+        (normal-top-level-add-subdirs-to-load-path)))
+  )
+
 
 (require 'init-misc)
 (require 'init-system-dependent)
 
 ; initialize elpa
 (require 'init-elpa)
-
-; add .emacs.d/elpa subdirectories to load-path
-(progn (cd "~/.emacs.d/elpa/")
-       (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-           (normal-top-level-add-subdirs-to-load-path)))
 
 ;; directly require my library
 (require 'pretty-jump-of-line)
@@ -41,6 +39,4 @@
 (require 'init-python-mode)
 (require 'init-ruby-mode)
 (require 'init-uniquify)
-
-(progn (cd "~"))
 

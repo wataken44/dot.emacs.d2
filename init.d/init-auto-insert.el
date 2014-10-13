@@ -14,12 +14,11 @@
 
 ;; templates
 (setq auto-insert-alist
-      (nconc '(
-               ("\\.cpp$" . ["template.cpp" replace-template])
-               ("\\.h$"   . ["template.h" replace-template])
-               ("\\.py$"  . ["template.py" replace-template])
-               ("\\.rb$"  . ["template.rb" replace-template])
-               ) auto-insert-alist))
+      (append '(("\\.cpp$" . ["template.cpp" replace-template])
+                ("\\.h$"   . ["template.h" replace-template])
+                ("\\.py$"  . ["template.py" replace-template])
+                ("\\.rb$"  . ["template.rb" replace-template]))
+              auto-insert-alist))
 
 (defvar template-replacements-alists
   '(("%file%" . (lambda () (file-name-nondirectory (buffer-file-name))))

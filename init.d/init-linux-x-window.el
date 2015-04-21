@@ -5,10 +5,12 @@
 
 (setq quail-japanese-use-double-n t)
 
-(require 'mozc)
-(setq default-input-method "japanese-mozc")
-(setq mozc-candidate-style 'echo-area)
-
-(global-set-key (kbd "C-/") 'toggle-input-method)
+(if (featurep 'mozc)
+    (let ()
+      (require 'mozc)
+      (setq default-input-method "japanese-mozc")
+      (setq mozc-candidate-style 'echo-area)
+      (global-set-key (kbd "C-/") 'toggle-input-method)
+      ))
 
 (provide 'init-linux-x-window)

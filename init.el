@@ -38,5 +38,6 @@
 (require 'init-js-mode)
 (require 'init-python-mode)
 (require 'init-ruby-mode)
+(require 'init-octave-mode)
 (require 'init-uniquify)
 

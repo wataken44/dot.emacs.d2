@@ -46,6 +46,7 @@
 (require 'init-python-mode)
 (require 'init-ruby-mode)
 (require 'init-octave-mode)
+(require 'init-typescript-mode)
 (require 'init-uniquify)
 
 (custom-set-variables
@@ -56,7 +57,7 @@
  '(helm-ff-auto-update-initial-value nil)
  '(package-selected-packages
    (quote
-    (markdown-mode smartparens helm google-c-style go-snippets go-mode go-autocomplete deferred))))
+    (typescript-mode markdown-mode smartparens helm google-c-style go-snippets go-mode go-autocomplete deferred))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -49,6 +49,10 @@
 (if (functionp 'line-number-mode)
     (line-number-mode t))
 
+;; display file size
+(if (functionp 'size-indication-mode)
+    (size-indication-mode t))
+
 ;; disable vc-git
 (setq vc-handled-backends ())
 

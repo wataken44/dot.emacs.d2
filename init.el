@@ -57,7 +57,7 @@
  '(helm-ff-auto-update-initial-value nil)
  '(package-selected-packages
    (quote
-    (blacken typescript-mode markdown-mode smartparens helm google-c-style go-snippets go-mode go-autocomplete deferred))))
+    (blacken google-c-style go-snippets go-autocomplete deferred))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

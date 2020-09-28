@@ -9,4 +9,9 @@
 	 (display-graphic-p))
     (require 'init-linux-x-window))
 
+;; cygwin emacs-w32
+(if (and (equal system-type 'cygwin)
+	 (display-graphic-p))
+    (require 'init-cygwin-emacs-w32))
+
 (provide 'init-system-dependent)

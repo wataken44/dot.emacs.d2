@@ -1,6 +1,6 @@
 
 (add-hook 'ruby-mode-hook
-          '(lambda ()
+          (lambda ()
              (setq indent-tabs-mode nil)
              (setq ruby-indent-level 4)
              (setq ruby-deep-indent-paren nil)

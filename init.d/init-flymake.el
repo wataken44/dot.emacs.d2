@@ -19,7 +19,7 @@
 (push '("\\.cpp$" flymake-cc-init) flymake-allowed-file-name-masks)
 
 (add-hook 'c++-mode-hook
-          '(lambda ()
+          (lambda ()
              (flymake-mode t)))
 
 ;; imported from http://moimoitei.blogspot.com/2010/05/flymake-in-emacs.html

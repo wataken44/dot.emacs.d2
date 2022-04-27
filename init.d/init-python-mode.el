@@ -1,6 +1,6 @@
 
 (add-hook 'python-mode-hook
-          '(lambda ()
+          (lambda ()
              (setq tab-width 4)
              (setq indent-tabs-mode nil)
              ))

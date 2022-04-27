@@ -27,13 +27,13 @@
                'emacs-lisp-mode-hook
                'lisp-interaction-mode
                ))
-  (add-hook hook '(lambda ()
+  (add-hook hook (lambda ()
                     (add-to-list 'ac-sources 'ac-source-symbols))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; C-common-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Enables omnicompletion with `c-mode-common'.
 (add-hook 'c-mode-common-hook
-          '(lambda ()
+          (lambda ()
              (add-to-list 'ac-omni-completion-sources
                           (cons "\\." '(ac-source-semantic)))
              (add-to-list 'ac-omni-completion-sources
@@ -42,12 +42,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; C++-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Keywords.
-(add-hook 'c++-mode-hook '(lambda ()
+(add-hook 'c++-mode-hook (lambda ()
                             (add-to-list 'ac-sources 'ac-c++-sources)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Haskell mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Keywords.
-(add-hook 'haskell-mode-hook '(lambda ()
+(add-hook 'haskell-mode-hook (lambda ()
                                 (add-to-list 'ac-sources 'ac-source-haskell)))
 
 (provide 'init-auto-complete-config)

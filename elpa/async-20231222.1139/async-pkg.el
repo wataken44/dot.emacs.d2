@@ -1,6 +1,6 @@
-(define-package "async" "20230528.622" "Asynchronous processing in Emacs"
+(define-package "async" "20231222.1139" "Asynchronous processing in Emacs"
   '((emacs "24.4"))
-  :commit "3ae74c0a4ba223ba373e0cb636c385e08d8838be" :authors
+  :commit "d604187c3c8a3290e78c00b4532b83d8d908b5c3" :authors
   '(("John Wiegley" . "jwiegley@gmail.com"))
   :maintainers
   '(("Thierry Volpiatto" . "thievol@posteo.net"))

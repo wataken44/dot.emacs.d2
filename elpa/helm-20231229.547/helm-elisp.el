@@ -159,9 +159,9 @@ display."
 ;; Called each time cursor move in helm-buffer.
 (defun helm-show-completion ()
   (with-helm-current-buffer
-    (overlay-put helm-show-completion-overlay
-                 'display (substring-no-properties
-                           (helm-get-selection)))))
+    (helm-aif (helm-get-selection)
+        (overlay-put helm-show-completion-overlay
+                     'display (substring-no-properties it)))))
 
 (defun helm-show-completion-init-overlay (beg end)
   (setq helm-show-completion-overlay (make-overlay beg end))
@@ -462,7 +462,7 @@ documentation when SYM name is the same for function and variable."
   "Preconfigured Helm to complete file name at point."
   (interactive)
   (require 'helm-mode)
-  (let* ((tap (or (thing-at-point 'filename) ""))
+  (let* ((tap (or (thing-at-point 'filename t) ""))
          beg
          (init (and tap
                     (or force
@@ -471,8 +471,7 @@ documentation when SYM name is the same for function and variable."
                           (search-backward tap (pos-bol) t)
                           (setq beg (point))
                           (looking-back "[^'`( ]" (1- (point)))))
-                    (expand-file-name
-                     (substring-no-properties tap))))
+                    (expand-file-name tap)))
          (end  (point))
          (helm-quit-if-no-candidate t)
          (helm-execute-action-at-once-if-one t)
@@ -484,6 +483,7 @@ documentation when SYM name is the same for function and variable."
       (delete-region beg end) (insert (if (string-match "^~" tap)
                                           (abbreviate-file-name completion)
                                         completion)))))
+(make-obsolete 'helm-complete-file-name-at-point 'helm-find-files "3.9.6")
 
 ;;;###autoload
 (defun helm-lisp-indent ()
@@ -494,20 +494,6 @@ documentation when SYM name is the same for function and variable."
   (let ((tab-always-indent (or (eq tab-always-indent 'complete)
                                tab-always-indent)))
     (indent-for-tab-command current-prefix-arg)))
-
-;;;###autoload
-(defun helm-lisp-completion-or-file-name-at-point ()
-  "Preconfigured Helm to complete Lisp symbol or filename at point.
-Filename completion happens if string start after or between a
-double quote."
-  (interactive)
-  (let* ((tap (thing-at-point 'filename)))
-    (if (and tap (save-excursion
-                   (end-of-line)
-                   (search-backward tap (pos-bol) t)
-                   (looking-back "[^'`( ]" (1- (point)))))
-        (helm-complete-file-name-at-point)
-      (helm-lisp-completion-at-point))))
 
 
 ;;; Apropos
@@ -953,18 +939,24 @@ a prefix arg."
                        for bn = (helm-basename c 2)
                        for sep = (helm-make-separator bn lgst)
                        for path = (or (assoc-default bn helm--locate-library-cache)
-                                      (let ((p (find-library-name bn)))
-                                        (push (cons bn p) helm--locate-library-cache)
-                                        p))
-                       for doc = (and (or completions-detailed helm-completions-detailed)
+                                      ;; A lock file in LOAD-PATH (bug#2626).
+                                      (unless (string-match "\\`\\.#" bn)
+                                        (let ((p (find-library-name bn)))
+                                          (push (cons bn p) helm--locate-library-cache)
+                                          p)))
+                       for doc = (and path
+                                      (or completions-detailed helm-completions-detailed)
                                       (or (gethash bn helm--locate-library-doc-cache)
                                           (puthash bn (helm-locate-lib-get-summary path)
                                                    helm--locate-library-doc-cache)))
-                       for disp = (if (or completions-detailed helm-completions-detailed)
-                                      (helm-aand (propertize doc 'face 'font-lock-warning-face)
-                                                 (propertize " " 'display (concat sep it))
-                                                 (concat bn it))
-                                    bn)
+                       for disp = (and path
+                                       (if (and doc
+                                                (or completions-detailed helm-completions-detailed))
+                                           (helm-aand (propertize doc 'face 'font-lock-warning-face)
+                                                      (propertize " " 'display (concat sep it))
+                                                      (concat bn it))
+                                         bn))
+                       when (and disp path)
                        collect (cons disp path)
                        when reporter do (progress-reporter-update reporter count)
                        finally do (setq done t)))

@@ -33,6 +33,7 @@
 (declare-function all-the-icons-icon-for-file"ext:all-the-icons.el")
 (declare-function all-the-icons-octicon      "ext:all-the-icons.el")
 (declare-function all-the-icons-match-to-alist "ext:all-the-icons.el")
+(declare-function all-the-icons-faicon "ext:all-the-icons.el")
 
 (defvar all-the-icons-dir-icon-alist)
 
@@ -250,7 +251,8 @@ will be honored."
 BOOKMARK is a bookmark name or a bookmark record."
   (or (eq (bookmark-get-handler bookmark) 'bmkext-jump-gnus)
       (eq (bookmark-get-handler bookmark) 'gnus-summary-bookmark-jump)
-      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-gnus)))
+      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-gnus)
+      (eq (bookmark-get-handler bookmark) 'bmkp-jump-gnus)))
 
 (defun helm-bookmark-mu4e-bookmark-p (bookmark)
   "Return non nil if BOOKMARK is a mu4e bookmark.
@@ -263,21 +265,24 @@ BOOKMARK is a bookmark name or a bookmark record."
 BOOKMARK is a bookmark name or a bookmark record."
   (or (eq (bookmark-get-handler bookmark) 'bmkext-jump-w3m)
       (eq (bookmark-get-handler bookmark) 'bookmark-w3m-bookmark-jump)
-      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-w3m)))
+      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-w3m)
+      (eq (bookmark-get-handler bookmark) 'bmkp-jump-w3m)))
 
 (defun helm-bookmark-woman-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a Woman bookmark.
 BOOKMARK is a bookmark name or a bookmark record."
   (or (eq (bookmark-get-handler bookmark) 'bmkext-jump-woman)
       (eq (bookmark-get-handler bookmark) 'woman-bookmark-jump)
-      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-woman)))
+      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-woman)
+      (eq (bookmark-get-handler bookmark) 'bmkp-jump-woman)))
 
 (defun helm-bookmark-man-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a Man bookmark.
 BOOKMARK is a bookmark name or a bookmark record."
   (or (eq (bookmark-get-handler bookmark) 'bmkext-jump-man)
       (eq (bookmark-get-handler bookmark) 'Man-bookmark-jump)
-      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-man)))
+      (eq (bookmark-get-handler bookmark) 'bookmarkp-jump-man)
+      (eq (bookmark-get-handler bookmark) 'bmkp-jump-man)))
 
 (defun helm-bookmark-woman-man-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a Man or Woman bookmark.
@@ -388,6 +393,10 @@ If `browse-url-browser-function' is set to something else than
 (defalias 'bookmarkp-jump-w3m #'helm-bookmark-jump-w3m)
 (defalias 'bookmarkp-jump-woman #'woman-bookmark-jump)
 (defalias 'bookmarkp-jump-man #'Man-bookmark-jump)
+(defalias 'bmkp-jump-gnus #'gnus-summary-bookmark-jump)
+(defalias 'bmkp-jump-w3m #'helm-bookmark-jump-w3m)
+(defalias 'bmkp-jump-woman #'woman-bookmark-jump)
+(defalias 'bmkp-jump-man #'Man-bookmark-jump)
 
 
 ;;;; Filtered bookmark sources
@@ -619,12 +628,13 @@ If `browse-url-browser-function' is set to something else than
                                              all-the-icons-dir-icon-alist))
                                   (apply (car it) (cdr it))
                                 (all-the-icons-octicon "file-directory")))
+                             (isw3m (all-the-icons-faicon "firefox"))
                              ((and isfile isinfo) (all-the-icons-octicon "info"))
-                             (isfile (all-the-icons-icon-for-file (helm-basename isfile)))
                              ((or iswoman isman)
                               (all-the-icons-fileicon "man-page"))
                              ((or isgnus ismu4e)
-                              (all-the-icons-octicon "mail-read"))))
+                              (all-the-icons-octicon "mail-read"))
+                             (isfile (all-the-icons-icon-for-file (helm-basename isfile)))))
           ;; Add a * if bookmark have annotation
           if (and isannotation (not (string-equal isannotation "")))
           do (setq trunc (concat "*" (if helm-bookmark-show-location trunc i)))

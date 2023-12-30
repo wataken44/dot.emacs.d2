@@ -1299,7 +1299,8 @@ is used."
     ;; unrelated files and directories coming in ... Even if this modify the
     ;; behavior of find-library-include-other-files remove them for the benefit
     ;; of everybody.
-    (unless (string-match "\\(\\.elc\\|/\\)\\'" comp)
+    (unless (or (string-match "\\(\\.elc\\|/\\)\\'" comp)
+                (string-match "\\`\\.#" comp)) ; (bug#2526)
       (let* ((sep (helm-make-separator comp))
              (path (or (assoc-default comp helm--locate-library-cache)
                        (let ((p (find-library-name comp)))
@@ -1338,11 +1339,10 @@ handling properties, see `helm-comp-read'.
 This handler should be used when candidate list doesn't need to be rebuilt
 dynamically otherwise use `helm-completing-read-default-2'."
   (let* ((history (or (car-safe hist) hist))
-         (initial-input (helm-aif (pcase init
-                                    ((pred (stringp)) init)
-                                    ;; INIT is a cons cell.
-                                    (`(,l . ,_ll) l))
-                            it))
+         (initial-input (pcase init
+                          ((pred (stringp)) init)
+                          ;; INIT is a cons cell.
+                          (`(,l . ,_ll) l)))
          (minibuffer-completion-table collection)
          (metadata (or (completion-metadata (or initial-input "") collection test)
                        '(metadata)))
@@ -2236,6 +2236,7 @@ When AFUN, AFIX are nil and CATEGORY is not file return COMPS unmodified."
                 (if (functionp affixations)
                     (cl-loop for comp in comps
                              for cand = (funcall affixations comp)
+                             when cand
                              collect (cons (propertize (concat (nth 1 cand) ;prefix
                                                                (nth 0 cand) ;comp
                                                                (nth 2 cand)) ;suffix

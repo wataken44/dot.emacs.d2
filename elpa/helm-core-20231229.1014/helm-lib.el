@@ -435,6 +435,9 @@ This is done recursively."
     exit-minibuffer
     helm-M-x))
 
+(defconst helm-this-command-functions '(read-multiple-choice--long-answers)
+  "The functions that should be returned by `helm-this-command' when found.")
+
 (defun helm-this-command ()
   "Return the actual command in action.
 Like `this-command' but return the real command, and not
@@ -442,13 +445,18 @@ Like `this-command' but return the real command, and not
   (cl-loop for count from 1 to 50
            for btf = (backtrace-frame count)
            for fn = (cl-second btf)
-           if (and
-               ;; In some case we may have in the way an
-               ;; advice compiled resulting in byte-code,
-               ;; ignore it (Bug#691).
-               (symbolp fn)
-               (commandp fn)
-               (not (memq fn helm-this-command-black-list)))
+           ;; Some commands like `kill-buffer' may call another function
+           ;; involving a completing-read, in this case we want to stop at this
+           ;; function and not go up to the initial interactive call (in this
+           ;; case kill-buffer) See Issue#2634.
+           if (or (memq fn helm-this-command-functions)
+                  (and
+                   ;; In some cases we may have in the way an
+                   ;; advice compiled resulting in byte-code,
+                   ;; ignore it (Bug#691).
+                   (symbolp fn)
+                   (commandp fn)
+                   (not (memq fn helm-this-command-black-list))))
            return fn
            else
            if (and (eq fn 'call-interactively)
@@ -875,10 +883,11 @@ This is a bug in `puthash' which store the printable
 representation of object instead of storing the object itself,
 this to provide at the end a printable representation of
 hashtable itself."
-  (cl-loop with cont = (make-hash-table :test test)
-           for elm in seq
-           unless (gethash elm cont)
-           collect (puthash elm elm cont)))
+  (let ((table (make-hash-table :test test)))
+    (mapcan (lambda (x)
+              (unless (gethash x table)
+                (list (puthash x x table))))
+            seq)))
 
 (defsubst helm--string-join (strings &optional separator)
   "Join all STRINGS using SEPARATOR."
@@ -1755,30 +1764,15 @@ Directories expansion is not supported."
          (cmd "%s %s | head -n1 | awk 'match($0,\"%s\",a) {print a[2]}'\
  | awk -F ' -*-' '{print $1}'")
          (regexp "^;;;(.*) ---? (.*)$")
-         (proc (start-process-shell-command
-                "helm-locate-lib-get-summary" "*helm locate lib*"
+         (desc (shell-command-to-string
                 (format cmd
                         (if (string-match-p "\\.gz\\'" file)
                             "gzip -c -q -d" "cat")
                         (shell-quote-argument file)
-                        regexp)))
-         output)
-    (set-process-filter proc nil)
-    (set-process-sentinel
-     proc (lambda (process event)
-            (when (and (string= event "finished\n")
-                       (process-buffer process))
-              (setq output
-                    (with-current-buffer (process-buffer process)
-                      (replace-regexp-in-string
-                       "\n" ""
-                       (buffer-string))))
-              (kill-buffer (process-buffer process)))))
-    (while (and proc (eq (process-status proc) 'run))
-      (accept-process-output proc))
-    (if (string= output "")
+                        regexp))))
+    (if (string= desc "")
         "Not documented"
-      output)))
+      (replace-regexp-in-string "\n" "" desc))))
 
 ;;; helm internals
 ;;

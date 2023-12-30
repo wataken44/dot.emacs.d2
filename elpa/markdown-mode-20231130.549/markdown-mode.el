@@ -51,6 +51,13 @@
 
 (declare-function project-roots "project")
 (declare-function sh-set-shell "sh-script")
+(declare-function mailcap-file-name-to-mime-type "mailcap")
+(declare-function dnd-get-local-file-name "dnd")
+
+;; for older emacs<29
+(declare-function mailcap-mime-type-to-extension "mailcap")
+(declare-function file-name-with-extension "files")
+(declare-function yank-media-handler "yank-media")
 
 
 ;;; Constants =================================================================
@@ -9293,16 +9300,17 @@ This function assumes point is on a table."
     (goto-char (point-min))
     (let ((cur (point))
           ret)
-      (while (re-search-forward "\\s-*\\(|\\)\\s-*" nil t)
-        (if (markdown--first-column-p (match-beginning 1))
-            (setq cur (match-end 0))
-          (cond ((eql (char-before (match-beginning 1)) ?\\)
-                 ;; keep spaces
-                 (goto-char (match-end 1)))
-                ((markdown--thing-at-wiki-link (match-beginning 1))) ;; do nothing
-                (t
-                 (push (buffer-substring-no-properties cur (match-beginning 0)) ret)
-                 (setq cur (match-end 0))))))
+      (while (and (re-search-forward "\\s-*\\(|\\)\\s-*" nil t))
+        (when (not (markdown--face-p (match-beginning 1) '(markdown-inline-code-face)))
+          (if (markdown--first-column-p (match-beginning 1))
+              (setq cur (match-end 0))
+            (cond ((eql (char-before (match-beginning 1)) ?\\)
+                   ;; keep spaces
+                   (goto-char (match-end 1)))
+                  ((markdown--thing-at-wiki-link (match-beginning 1))) ;; do nothing
+                  (t
+                   (push (buffer-substring-no-properties cur (match-beginning 0)) ret)
+                   (setq cur (match-end 0)))))))
       (when (< cur (length line))
         (push (buffer-substring-no-properties cur (point-max)) ret))
       (nreverse ret))))
@@ -9836,6 +9844,48 @@ rows and columns and the column alignment."
               (markdown--substitute-command-keys
                "\\[markdown-toggle-markup-hiding]"))))))
 
+(defun markdown--image-media-handler (mimetype data)
+  (let* ((ext (symbol-name (mailcap-mime-type-to-extension mimetype)))
+         (filename (read-string "Insert filename for image: "))
+         (link-text (read-string "Link text: "))
+         (filepath (file-name-with-extension filename ext))
+         (dir (file-name-directory filepath)))
+    (when (and dir (not (file-directory-p dir)))
+      (make-directory dir t))
+    (with-temp-file filepath
+      (insert data))
+    (when (string-match-p "\\s-" filepath)
+      (setq filepath (concat "<" filepath ">")))
+    (markdown-insert-inline-image link-text filepath)))
+
+(defun markdown--file-media-handler (_mimetype data)
+  (let* ((data (split-string data "[\0\r\n]" t "^file://"))
+         (files (cdr data)))
+    (while (not (null files))
+      (let* ((file (url-unhex-string (car files)))
+             (file (file-relative-name file))
+             (prompt (format "Link text(%s): " (file-name-nondirectory file)))
+             (link-text (read-string prompt)))
+        (when (string-match-p "\\s-" file)
+          (setq file (concat "<" file ">")))
+        (markdown-insert-inline-image link-text file)
+        (when (not (null (cdr files)))
+          (insert " "))
+        (setq files (cdr files))))))
+
+(defun markdown--dnd-local-file-handler (url _action)
+  (require 'mailcap)
+  (require 'dnd)
+  (let* ((filename (dnd-get-local-file-name url))
+         (mimetype (mailcap-file-name-to-mime-type filename))
+         (file (file-relative-name filename))
+         (link-text "link text"))
+    (when (string-match-p "\\s-" file)
+      (setq file (concat "<" file ">")))
+    (if (string-prefix-p "image/" mimetype)
+        (markdown-insert-inline-image link-text file)
+      (markdown-insert-inline-link link-text file))))
+
 
 ;;; Mode Definition  ==========================================================
 
@@ -9963,6 +10013,16 @@ rows and columns and the column alignment."
   ;; Electric quoting
   (add-hook 'electric-quote-inhibit-functions
             #'markdown--inhibit-electric-quote nil :local)
+
+  ;; drag and drop handler
+  (setq-local dnd-protocol-alist  (cons '("^file:///" . markdown--dnd-local-file-handler)
+                                        dnd-protocol-alist))
+
+  ;; media handler
+  (when (version< "29" emacs-version)
+    (yank-media-handler "image/.*" #'markdown--image-media-handler)
+    ;; TODO support other than GNOME, like KDE etc
+    (yank-media-handler "x-special/gnome-copied-files" #'markdown--file-media-handler))
 
   ;; Make checkboxes buttons
   (when markdown-make-gfm-checkboxes-buttons

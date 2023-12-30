@@ -52,7 +52,7 @@ Preconfigured `helm' for bookmarks." t)
 Preconfigured `helm' for bookmarks (filtered by category).
 Optional source `helm-source-bookmark-addressbook' is loaded only
 if external addressbook-bookmark package is installed." t)
-(register-definition-prefixes "helm-bookmark" '("bmkext-jump-" "bookmark" "helm-"))
+(register-definition-prefixes "helm-bookmark" '("bmk" "bookmark" "helm-"))
 
 
 ;;; Generated autoloads from helm-buffers.el
@@ -117,10 +117,6 @@ Preconfigured Helm to complete file name at point.
 
 (fn &optional FORCE)" t)
 (autoload 'helm-lisp-indent "helm-elisp" nil t)
-(autoload 'helm-lisp-completion-or-file-name-at-point "helm-elisp" "\
-Preconfigured Helm to complete Lisp symbol or filename at point.
-Filename completion happens if string start after or between a
-double quote." t)
 (autoload 'helm-apropos "helm-elisp" "\
 Preconfigured Helm to describe commands, functions, variables and faces.
 In non interactives calls DEFAULT argument should be provided as

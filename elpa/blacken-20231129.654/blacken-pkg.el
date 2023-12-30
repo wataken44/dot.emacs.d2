@@ -1,6 +1,6 @@
-(define-package "blacken" "20230821.1738" "Reformat python buffers using the \"black\" formatter"
+(define-package "blacken" "20231129.654" "Reformat python buffers using the \"black\" formatter"
   '((emacs "25.2"))
-  :commit "15084b386561cd3672e9fc8cdce4647b60693111" :authors
+  :commit "a43695f9cb412df93ac8d38b55ab1515e86e217e" :authors
   '(("Artem Malyshev" . "proofit404@gmail.com"))
   :maintainers
   '(("Artem Malyshev" . "proofit404@gmail.com"))

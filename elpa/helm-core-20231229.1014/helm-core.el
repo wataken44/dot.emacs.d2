@@ -4,7 +4,7 @@
 
 ;; Author: Thierry Volpiatto <thievol@posteo.net>
 ;; URL: https://emacs-helm.github.io/helm/
-;; Version: 3.9.5
+;; Version: 3.9.7
 ;; Package-Requires: ((emacs "25.1") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -229,7 +229,7 @@ executing the first function on the next hit."
   "Define NAME as a multi-key command running FUNS.
 After DELAY seconds, the FUNS list is reinitialized.
 See `helm-define-multi-key'."
-  (declare (indent 2))
+  (declare (indent 2) (doc-string 2))
   (setq docstring (if docstring (concat docstring "\n\n")
                     "This is a helm-ish multi-key command."))
   `(defalias (quote ,name) (helm-make-multi-command ,funs ,delay) ,docstring))
@@ -240,7 +240,7 @@ Run each function in the FUNCTIONS list in turn when called within
 DELAY seconds."
   (declare (indent 1))
   (let ((funs functions)
-        (iter (list nil))
+        (iter (list nil)) ; ref-cell[1].
         (timeout delay))
     (lambda ()
       (interactive)
@@ -251,6 +251,8 @@ DELAY seconds."
               (cl-loop for count from 1 to (length functions)
                        collect count)))
         next)
+    ;; By passing a list containing a single 'nil' element [1] as ITERATOR we
+    ;; avoid using a global var.
     (unless (and (car iterator)
                  ;; Reset iterator when another key is pressed.
                  (eq this-command real-last-command))
@@ -439,11 +441,11 @@ i.e. the loop is not entered after running COMMAND."
     (define-key map (kbd "C-r")        #'undefined)
     (define-key map (kbd "C-M-r")      #'undefined)
     (define-key map (kbd "C-M-s")      #'undefined)
-    (define-key map (kbd "C-z")        #'undefined)
     (define-key map (kbd "C-}")        #'helm-narrow-window)
     (define-key map (kbd "C-{")        #'helm-enlarge-window)
     (define-key map (kbd "C-c -")      #'helm-swap-windows)
     (define-key map (kbd "C-c _")      #'helm-toggle-full-frame)
+    (define-key map (kbd "C-z")        #'helm-toggle-full-frame)
     (define-key map (kbd "C-c %")      #'helm-exchange-minibuffer-and-header-line)
     (define-key map (kbd "C-c C-y")    #'helm-yank-selection)
     (define-key map (kbd "C-c C-k")    #'helm-kill-selection-and-quit)
@@ -740,7 +742,9 @@ handle this."
   :type 'symbol)
 
 (defcustom helm-split-window-other-side-when-one-window 'below
-  "The default side to display `helm-buffer' when (1)
+  "Place for `helm-window' when `helm-split-window-default-side' is \\='other.
+
+The default side to display `helm-buffer' when (1)
 `helm-split-window-default-side' is \\='other and (2)
 the current frame only has one window. Possible values
 are acceptable args for `split-window' SIDE, that is `below',
@@ -4015,16 +4019,14 @@ Update is reenabled when idle 1s."
   (with-helm-alive-p
     (unless helm--suspend-update-interactive-flag
       (helm-suspend-update 1))
-    (helm-delete-char-backward arg)
+    (delete-char (- arg))
     (run-with-idle-timer
      1 nil
      (lambda ()
        (unless helm--suspend-update-interactive-flag
          (helm-suspend-update -1)
          (helm-check-minibuffer-input)
-         ;; Already done by helm-delete-char-backward.
-         (unless (string= (minibuffer-contents) "")
-           (helm-force-update)))))))
+         (helm-force-update))))))
 (put 'helm-delete-backward-no-update 'helm-only t)
 
 (defun helm-delete-char-backward (arg)
